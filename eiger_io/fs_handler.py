@@ -5,7 +5,7 @@ import six
 import numpy as np
 
 from filestore.retrieve import HandlerBase
-from .pims_readers import EigerImages
+from .pims_reader import EigerImages
 
 
 class EigerHandler(HandlerBase):
