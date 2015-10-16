@@ -57,7 +57,7 @@ class EigerImages(FramesSequence):
         self._toc = np.concatenate(
                 list([zip(i*np.ones(length, dtype=int),
                      np.arange(length, dtype=int))
-                for i, length in enumerate(lengths)]) )
+                for i, length in enumerate(lengths)]) ) #modify here, add list()
 
     def get_frame(self, i):
         key_number, elem_number = self._toc[i]
