@@ -17,12 +17,12 @@ from pims import FramesSequence, Frame
 
 class EigerImages(FramesSequence):
     pattern = re.compile('(.*)master.*')    
-    def __init__(self, master_filepath):
+    def __init__(self, master_filepath, metadata):
         # The 'master' file points to data in other files.
         # Construct a list of those filepaths and check that they exist.
         self.master_filepath = master_filepath
+        self._metadata = metadata
 
-        
         ndatafiles = 0
         m = self.pattern.match(os.path.basename(master_filepath))
         
@@ -79,3 +79,15 @@ class EigerImages(FramesSequence):
     @property
     def pixel_type(self):
         return self[0].dtype
+
+    @property
+    def md(self):
+        return self._metadata
+
+    @property
+    def dtype(self):
+        return self.pixel_type
+
+    @property
+    def shape(self):
+        return self.frame_shape

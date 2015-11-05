@@ -23,24 +23,6 @@ class EigerHandler(HandlerBase):
         return np.array(EigerImages(master_path))
 
 
-class FixedEigerImages(EigerImages):
-    def __init__(self, path, metadata):
-        super().__init__(path)
-        self._metadata = metadata
-
-    @property
-    def md(self):
-        return self._metadata
-
-    @property
-    def dtype(self):
-        return self.pixel_type
-
-    @property
-    def shape(self):
-        return self.frame_shape
-
-
 class LazyEigerHandler(HandlerBase):
     specs = {'AD_EIGER'} | HandlerBase.specs
     def __init__(self, fpath, frame_per_point, mapping=None):
@@ -70,4 +52,4 @@ class LazyEigerHandler(HandlerBase):
         pixel_mask[pixel_mask==2] = 1
         md['framerate'] = 1./md['frame_time']
         # TODO Return a multi-dimensional PIMS seq
-        return FixedEigerImages(master_path, md)
+        return EigerImages(master_path, md)
