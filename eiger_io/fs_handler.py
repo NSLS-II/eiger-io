@@ -23,6 +23,19 @@ class EigerHandler(HandlerBase):
         return np.array(EigerImages(master_path))
 
 
+EIGER_MD_DICT = {
+    'y_pixel_size': 'entry/instrument/detector/y_pixel_size',
+    'x_pixel_size': 'entry/instrument/detector/x_pixel_size',
+    'detector_distance': 'entry/instrument/detector/detector_distance',
+    'incident_wavelength': 'entry/instrument/beam/incident_wavelength',
+    'frame_time': 'entry/instrument/detector/frame_time',
+    'beam_center_x': 'entry/instrument/detector/beam_center_x',
+    'beam_center_y': 'entry/instrument/detector/beam_center_y',
+    'count_time': 'entry/instrument/detector/count_time',
+    'binary_mask': 'entry/instrument/detector/detectorSpecific/pixel_mask',
+}
+
+
 class LazyEigerHandler(HandlerBase):
     specs = {'AD_EIGER'} | HandlerBase.specs
     def __init__(self, fpath, frame_per_point, mapping=None):
@@ -45,11 +58,8 @@ class LazyEigerHandler(HandlerBase):
         # 4  -- under-responsive
         # 8  -- over-responsive
         # 16 -- noisy
-        binary_mask = md['binary_mask']
-        binary_mask[binary_mask>0] = 1
-        binary_mask[binary_mask==0] = 2
-        binary_mask[binary_mask==1] = 0
-        binary_mask[binary_mask==2] = 1
+        pixel_mask = ~(md['binary_mask'] == 0)
+        md['binary_mask'] = pixel_mask.astype(np.uint16)
         md['framerate'] = 1./md['frame_time']
         # TODO Return a multi-dimensional PIMS seq
         return EigerImages(master_path, md)
