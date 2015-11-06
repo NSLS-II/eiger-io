@@ -32,7 +32,7 @@ EIGER_MD_DICT = {
     'beam_center_x': 'entry/instrument/detector/beam_center_x',
     'beam_center_y': 'entry/instrument/detector/beam_center_y',
     'count_time': 'entry/instrument/detector/count_time',
-    'binary_mask': 'entry/instrument/detector/detectorSpecific/pixel_mask',
+    'pixel_mask': 'entry/instrument/detector/detectorSpecific/pixel_mask',
 }
 
 
@@ -58,7 +58,7 @@ class LazyEigerHandler(HandlerBase):
         # 4  -- under-responsive
         # 8  -- over-responsive
         # 16 -- noisy
-        pixel_mask = ~(md['binary_mask'] == 0)
+        pixel_mask = ~(md['pixel_mask'] == 0)
         md['binary_mask'] = pixel_mask.astype(np.uint16)
         md['framerate'] = 1./md['frame_time']
         # TODO Return a multi-dimensional PIMS seq
