@@ -58,8 +58,7 @@ class LazyEigerHandler(HandlerBase):
         # 4  -- under-responsive
         # 8  -- over-responsive
         # 16 -- noisy
-        pixel_mask = ~(md['pixel_mask'] == 0)
-        md['binary_mask'] = pixel_mask.astype(np.uint16)
+        md['binary_mask'] = ~(md['pixel_mask'] == 0)
         md['framerate'] = 1./md['frame_time']
         # TODO Return a multi-dimensional PIMS seq
         return EigerImages(master_path, md)
