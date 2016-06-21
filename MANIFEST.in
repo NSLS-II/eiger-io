@@ -1,0 +1,2 @@
+include versioneer.py
+include eiger_io/_version.py
