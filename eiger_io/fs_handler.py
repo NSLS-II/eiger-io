@@ -49,7 +49,7 @@ class LazyEigerHandler(HandlerBase):
     def __call__(self, seq_id):
         master_path = '{}_{}_master.h5'.format(self._base_path, seq_id)
         md = {}
-        print('hdf5 path = %s' % master_path)
+        #print('hdf5 path = %s' % master_path)
         with h5py.File(master_path, 'r') as f:
             md = {k: f[v][()] for k, v in self.vals_dict.items()}
         # the pixel mask from the eiger contains:
