@@ -5,7 +5,7 @@ import six
 import numpy as np
 import h5py
 
-from filestore.retrieve import HandlerBase
+from filestore.handlers_base import HandlerBase
 from .pims_reader import EigerImages
 
 
