@@ -5,7 +5,12 @@ import six
 import numpy as np
 import h5py
 
-from filestore.retrieve import HandlerBase
+try:
+    # databroker v0.9.0
+    from databroker.assets.handlers import HandlerBase
+except ImportError:
+    # databroker < v0.9.0
+    from filestore.retrieve import HandlerBase
 from .pims_reader import EigerImages
 
 
