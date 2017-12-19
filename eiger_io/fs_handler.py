@@ -1,6 +1,7 @@
 import numpy as np
 import h5py
 from pims import FramesSequence, Frame
+import os
 
 try:
     # databroker v0.9.0
