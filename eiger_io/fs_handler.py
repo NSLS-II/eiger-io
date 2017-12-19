@@ -9,7 +9,6 @@ try:
 except ImportError:
     # databroker < v0.9.0
     from filestore.retrieve import HandlerBase
-from .pims_reader import EigerImages
 import re
 
 class EigerImages(FramesSequence):
