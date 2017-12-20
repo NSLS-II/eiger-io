@@ -76,7 +76,24 @@ class EigerDaskHandler(HandlerBase):
     }
     specs = {'AD_EIGER2', 'AD_EIGER'}
     pattern = re.compile('(.*)master.*')
-    def __init__(self, fpath, images_per_file):
+    def __init__(self, fpath, images_per_file=None, frame_per_point=None):
+        if images_per_file is None and frame_per_point is None:
+            errormsg = "images_per_file and frame_per_point both set"
+            errormsg += "\n This is likely an error. Please check your resource"
+            errormsg += "\n (tip: use a RawHandler to debug resource output)"
+            raise ValueError(errormsg)
+
+        if images_per_file is None:
+            # then grab from frame_per_point
+            if frame_per_point is None:
+                # if both are none, then raise an error
+                msg = "Both images_per_file and frame_per_point not set"
+                raise ValueError(msg)
+            images_per_file = frame_per_point
+            print("got frame_per_point")
+        else:
+            print("got images_per_file")
+
         self.images_per_file = images_per_file
         self._base_path = fpath
 
