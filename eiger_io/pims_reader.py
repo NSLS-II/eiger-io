@@ -38,14 +38,14 @@ class EigerImages(FramesSequence):
             if pattern_data in  files:
                 ndatafiles +=1
         
-        with h5py.File(master_filepath) as f:
-            try:
-                entry = f['entry']['data']  # Eiger firmware v1.3.0 and onwards
-            except KeyError:
-                entry = f['entry']          # Older firmwares
-            self.keys = sorted([k for k in entry.keys() if k.startswith('data')])[:ndatafiles]
+        f=h5py.File(master_filepath)
+        try:
+            entry = f['entry']['data']  # Eiger firmware v1.3.0 and onwards
+        except KeyError:
+            entry = f['entry']          # Older firmwares
+        self.keys = sorted([k for k in entry.keys() if k.startswith('data')])[:ndatafiles]
 
-            lengths = [entry[key].shape[0] for key in self.keys]
+        lengths = [entry[key].shape[0] for key in self.keys]
         for k in self.keys:
             filename = prefix + k + '.h5'
             filepath = os.path.join(os.path.dirname(master_filepath), filename)
@@ -58,15 +58,15 @@ class EigerImages(FramesSequence):
                  [list(zip(i*np.ones(length, dtype=int),
                            np.arange(length, dtype=int)))
                   for i, length in enumerate(lengths) ])
+        self.masterfid=f
 
     def get_frame(self, i):
         key_number, elem_number = self._toc[i]
         key = self.keys[key_number]
-        with h5py.File(self.master_filepath) as f:
-            try:
-                img = f['entry']['data'][key][elem_number]  # Eiger firmware v1.3.0 and onwards
-            except KeyError:
-                img = f['entry'][key][elem_number]          # Older firmwares
+        try:
+    	    img = self.masterfid['entry']['data'][key][elem_number]  # Eiger firmware v1.3.0 and onwards
+        except KeyError:
+            img = self.masterfid['entry'][key][elem_number]          # Older firmwares
         return Frame(img, frame_no=i)
 
     def __len__(self):
