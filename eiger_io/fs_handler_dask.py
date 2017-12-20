@@ -1,10 +1,16 @@
-import dask.array as da
-from pims import FramesSequence
-from databroker.assets.handlers_base import HandlerBase
 import re
 import h5py
-
 import os
+
+import dask.array as da
+from pims import FramesSequence
+
+try:
+    # databroker v0.9.0
+    from databroker.assets.handlers import HandlerBase
+except ImportError:
+    # databroker < v0.9.0
+    from filestore.retrieve import HandlerBase
 
 
 class PIMSDask(FramesSequence):
@@ -76,10 +82,12 @@ class EigerDaskHandler(HandlerBase):
     }
     specs = {'AD_EIGER2', 'AD_EIGER'}
     pattern = re.compile('(.*)master.*')
+
     def __init__(self, fpath, images_per_file=None, frame_per_point=None):
         if images_per_file is None and frame_per_point is None:
             errormsg = "images_per_file and frame_per_point both set"
-            errormsg += "\n This is likely an error. Please check your resource"
+            errormsg += "\n This is likely an error."
+            errormsg += " Please check your resource"
             errormsg += "\n (tip: use a RawHandler to debug resource output)"
             raise ValueError(errormsg)
 
@@ -113,7 +121,8 @@ class EigerDaskHandler(HandlerBase):
 
         self._handle = h5py.File(master_path, 'r')
         try:
-            self._entry = self._handle['entry']['data']  # Eiger firmware v1.3.0 and onwards
+            # Eiger firmware v1.3.0 and onwards
+            self._entry = self._handle['entry']['data']
         except KeyError:
             self._entry = self._handle['entry']          # Older firmwares
 
@@ -128,7 +137,7 @@ class EigerDaskHandler(HandlerBase):
         # 8  -- over-responsive
         # 16 -- noisy
         pixel_mask = md['pixel_mask']
-        md['binary_mask'] = (md['pixel_mask'] == 0)
+        md['binary_mask'] = (pixel_mask == 0)
         md['framerate'] = 1./md['frame_time']
 
         # TODO : Return a multi-dimensional PIMS seq.

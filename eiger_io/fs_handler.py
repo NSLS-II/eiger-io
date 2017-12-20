@@ -1,7 +1,8 @@
-import numpy as np
 import h5py
-from pims import FramesSequence, Frame
 import os
+import re
+
+from pims import FramesSequence, Frame
 
 try:
     # databroker v0.9.0
@@ -9,14 +10,15 @@ try:
 except ImportError:
     # databroker < v0.9.0
     from filestore.retrieve import HandlerBase
-import re
+
 
 class EigerImages(FramesSequence):
     # the regexp patterns for expected files
     # here it is just file containing "master" but could potentially be
     # expanded upon
     pattern = re.compile('(.*)master.*')
-    def __init__(self, master_filepath, images_per_file, *, md=None):
+
+    def __init__(self, master_filepath, images_per_file, md=None):
         # check that 'master' is in file
         m = self.pattern.match(os.path.basename(master_filepath))
 
@@ -30,7 +32,8 @@ class EigerImages(FramesSequence):
         self.images_per_file = images_per_file
         self._handle = h5py.File(master_filepath, 'r')
         try:
-            self._entry = self._handle['entry']['data']  # Eiger firmware v1.3.0 and onwards
+            # Eiger firmware v1.3.0 and onwards
+            self._entry = self._handle['entry']['data']
         except KeyError:
             self._entry = self._handle['entry']          # Older firmwares
 
@@ -51,7 +54,8 @@ class EigerImages(FramesSequence):
         return valid_keys
 
     def get_frame(self, i):
-        dataset = self._entry['data_{:06d}'.format(1 + (i // self.images_per_file))]
+        dataset = self._entry['data_{:06d}'
+                              .format(1 + (i // self.images_per_file))]
         img = dataset[i % self.images_per_file]
         return Frame(img, frame_no=i)
 
@@ -77,7 +81,8 @@ class EigerImages(FramesSequence):
     def close(self):
         self._handle.close()
 
-class EigerHandler:
+
+class EigerHandler(HandlerBase):
     EIGER_MD_LAYOUT = {
         'y_pixel_size': 'entry/instrument/detector/y_pixel_size',
         'x_pixel_size': 'entry/instrument/detector/x_pixel_size',
@@ -90,6 +95,7 @@ class EigerHandler:
         'pixel_mask': 'entry/instrument/detector/detectorSpecific/pixel_mask',
     }
     specs = {'AD_EIGER2', 'AD_EIGER'}
+
     def __init__(self, fpath, images_per_file=None, frame_per_point=None):
         ''' Initializer for Eiger handler.
 
@@ -102,7 +108,8 @@ class EigerHandler:
         self._base_path = fpath
         if images_per_file is None and frame_per_point is None:
             errormsg = "images_per_file and frame_per_point both set"
-            errormsg += "\n This is likely an error. Please check your resource"
+            errormsg += "\n This is likely an error."
+            errormsg += " Please check your resource"
             errormsg += "\n (tip: use a RawHandler to debug resource output)"
             raise ValueError(errormsg)
 
@@ -130,12 +137,11 @@ class EigerHandler:
         # 8  -- over-responsive
         # 16 -- noisy
         pixel_mask = md['pixel_mask']
-        #pixel_mask[pixel_mask>0] = 1
-        #pixel_mask[pixel_mask==0] = 2
-        #pixel_mask[pixel_mask==1] = 0
-        #pixel_mask[pixel_mask==2] = 1
-        md['binary_mask'] = (md['pixel_mask'] == 0)
+        # pixel_mask[pixel_mask>0] = 1
+        # pixel_mask[pixel_mask==0] = 2
+        # pixel_mask[pixel_mask==1] = 0
+        # pixel_mask[pixel_mask==2] = 1
+        md['binary_mask'] = (pixel_mask == 0)
         md['framerate'] = 1./md['frame_time']
         # TODO Return a multi-dimensional PIMS seq.
         return EigerImages(master_path, self._images_per_file, md=md)
-
