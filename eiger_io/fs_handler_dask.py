@@ -22,9 +22,6 @@ class PIMSDask(FramesSequence):
             - this should be upgraded to allow nested FramesSequences
                 (need to allow for defining axes etc)
     '''
-    # the regexp patterns for expected files
-    # here it is just file containing "master" but could potentially be
-    # expanded upon
     def __init__(self, data, md=None):
         '''
             Initialized a lazy loader for EigerImages
@@ -81,6 +78,10 @@ class EigerDaskHandler(HandlerBase):
         'pixel_mask': 'entry/instrument/detector/detectorSpecific/pixel_mask',
     }
     specs = {'AD_EIGER2', 'AD_EIGER'}
+
+    # the regexp patterns for expected files
+    # here it is just file containing "master" but could potentially be
+    # expanded upon
     pattern = re.compile('(.*)master.*')
 
     def __init__(self, fpath, images_per_file=None, frame_per_point=None):

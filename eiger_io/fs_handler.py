@@ -35,7 +35,8 @@ class EigerImages(FramesSequence):
             # Eiger firmware v1.3.0 and onwards
             self._entry = self._handle['entry']['data']
         except KeyError:
-            self._entry = self._handle['entry']          # Older firmwares
+            # Older firmwares
+            self._entry = self._handle['entry']
 
     @property
     def md(self):
@@ -59,6 +60,7 @@ class EigerImages(FramesSequence):
         img = dataset[i % self.images_per_file]
         return Frame(img, frame_no=i)
 
+    # this uses a trick to check for valid keys before counting
     def __len__(self):
         return sum(self._entry[k].shape[0] for k in self.valid_keys)
 
@@ -99,6 +101,17 @@ class EigerHandler(HandlerBase):
     def __init__(self, fpath, images_per_file=None, frame_per_point=None):
         ''' Initializer for Eiger handler.
 
+            Parameters
+            ----------
+            fpath : str
+                the partial file path
+
+            images_per_file : int, optional
+                images per file. If not set, must set frame_per_point
+
+            frame_per_point : int, optional. If not set, must set
+                images_per_file
+
             This one is backwards compatible for both versions of resources
             saved in databroker. Old resources used 'frame_per_point' as a
             kwarg. Newer resources call this 'images_per_file'.
@@ -127,6 +140,18 @@ class EigerHandler(HandlerBase):
         self._images_per_file = images_per_file
 
     def __call__(self, seq_id):
+        '''
+            This returns data contained in the file.
+
+            Parameters
+            ----------
+            seq_id : int
+                The sequence id of the data
+
+            Returns
+            -------
+                A PIMS FramesSequence of data
+        '''
         master_path = '{}_{}_master.h5'.format(self._base_path, seq_id)
         with h5py.File(master_path, 'r') as f:
             md = {k: f[v].value for k, v in self.EIGER_MD_LAYOUT.items()}
