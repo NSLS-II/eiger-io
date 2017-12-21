@@ -80,6 +80,19 @@ class PIMSDask(FramesSequence):
     def _to_dask(self):
         return self._data
 
+
+# TODO : remove this eventually (this should not be used, metadata should be accessed via metadatastore)
+EIGER_MD_LAYOUT = {
+    'y_pixel_size': 'entry/instrument/detector/y_pixel_size',
+    'x_pixel_size': 'entry/instrument/detector/x_pixel_size',
+    'detector_distance': 'entry/instrument/detector/detector_distance',
+    'incident_wavelength': 'entry/instrument/beam/incident_wavelength',
+    'frame_time': 'entry/instrument/detector/frame_time',
+    'beam_center_x': 'entry/instrument/detector/beam_center_x',
+    'beam_center_y': 'entry/instrument/detector/beam_center_y',
+    'count_time': 'entry/instrument/detector/count_time',
+    'pixel_mask': 'entry/instrument/detector/detectorSpecific/pixel_mask',
+}
 def _load_eiger_images(master_path):
     ''' load images from EIGER data using fpath.
 
@@ -91,13 +104,13 @@ def _load_eiger_images(master_path):
     with h5py.File(master_path, 'r') as f:
         try:
             # Eiger firmware v1.3.0 and onwards
-            self._entry = f['entry']['data']
+            _entry = f['entry']['data']
         except KeyError:
-            self._entry = f['entry']          # Older firmwares
+            _entry = f['entry']          # Older firmwares
     
         # TODO : perhaps remove the metadata eventually
         md = dict()
-        md = {k: f[v].value for k, v in self.EIGER_MD_LAYOUT.items()}
+        md = {k: f[v].value for k, v in EIGER_MD_LAYOUT.items()}
         # the pixel mask from the eiger contains:
         # 1  -- gap
         # 2  -- dead
@@ -111,10 +124,10 @@ def _load_eiger_images(master_path):
         # TODO : Return a multi-dimensional PIMS seq.
         # this is the logic that creates the linked dask array
         elements = list()
-        key_names = sorted(list(self._entry.keys()))
+        key_names = sorted(list(_entry.keys()))
         for keyname in key_names:
-            print(f"{keyname}")
-            val = self._entry[keyname]
+            #print(f"{keyname}")
+            val = _entry[keyname]
             elements.append(da.from_array(val, chunks=val.chunks))
     
         res = da.concatenate(elements)
@@ -123,17 +136,6 @@ def _load_eiger_images(master_path):
 
 
 class EigerDaskHandler(HandlerBase):
-    EIGER_MD_LAYOUT = {
-        'y_pixel_size': 'entry/instrument/detector/y_pixel_size',
-        'x_pixel_size': 'entry/instrument/detector/x_pixel_size',
-        'detector_distance': 'entry/instrument/detector/detector_distance',
-        'incident_wavelength': 'entry/instrument/beam/incident_wavelength',
-        'frame_time': 'entry/instrument/detector/frame_time',
-        'beam_center_x': 'entry/instrument/detector/beam_center_x',
-        'beam_center_y': 'entry/instrument/detector/beam_center_y',
-        'count_time': 'entry/instrument/detector/count_time',
-        'pixel_mask': 'entry/instrument/detector/detectorSpecific/pixel_mask',
-    }
     specs = {'AD_EIGER2', 'AD_EIGER'}
 
     def __init__(self, fpath, images_per_file=None, frame_per_point=None):
@@ -150,10 +152,11 @@ class EigerDaskHandler(HandlerBase):
                 # if both are none, then raise an error
                 msg = "Both images_per_file and frame_per_point not set"
                 raise ValueError(msg)
+            # got frame_per_point
             images_per_file = frame_per_point
-            print("got frame_per_point")
         else:
-            print("got images_per_file")
+            # go images per file
+            pass
 
         # don't need images_per_file, we can figure it out from hdf5
         # TODO : might need to check valid_keys
