@@ -3,7 +3,7 @@ import h5py
 import os
 
 import dask.array as da
-from pims import FramesSequence
+from pims import FramesSequence, Frame
 
 
 '''
@@ -56,7 +56,9 @@ class PIMSDask(FramesSequence):
         return self._md
 
     def get_frame(self, i):
-        return self._data[i].compute()
+        # had to return Frame to be friendly with pims_pipeline operations...
+        img = self._data[i].compute()
+        return Frame(img, frame_no=i)
 
     def __len__(self):
         return len(self._data)
