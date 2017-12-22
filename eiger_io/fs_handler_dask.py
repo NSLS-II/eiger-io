@@ -137,7 +137,7 @@ def _load_eiger_images(master_path):
     return res, md
 
 
-class EigerDaskHandler(HandlerBase):
+class EigerHandlerDask(HandlerBase):
     specs = {'AD_EIGER2', 'AD_EIGER'}
 
     def __init__(self, fpath, images_per_file=None, frame_per_point=None):
