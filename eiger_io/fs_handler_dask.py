@@ -175,3 +175,16 @@ class EigerHandlerDask(HandlerBase):
         # this gives metadata and also makes the assumption when
         # to run .compute() for dask array
         return PIMSDask(data, md=md)
+
+    def get_file_list(self, datum_kwargs):
+        ''' get the file list.
+
+            Receives a list of datum_kwargs for each datum
+        '''
+        filenames = []
+        for dm_kw in datum_kwargs:
+            seq_id = dm_kw['seq_id']
+            filename = '{}_{}_master.h5'.format(self._base_path, seq_id)
+            filenames.append(filename)
+
+        return filenames

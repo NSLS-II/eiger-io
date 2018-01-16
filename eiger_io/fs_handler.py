@@ -170,3 +170,16 @@ class EigerHandler(HandlerBase):
         md['framerate'] = 1./md['frame_time']
         # TODO Return a multi-dimensional PIMS seq.
         return EigerImages(master_path, self._images_per_file, md=md)
+
+    def get_file_list(self, datum_kwargs):
+        ''' get the file list.
+
+            Receives a list of datum_kwargs for each datum
+        '''
+        filenames = []
+        for dm_kw in datum_kwargs:
+            seq_id = dm_kw['seq_id']
+            filename = '{}_{}_master.h5'.format(self._base_path, seq_id)
+            filenames.append(filename)
+
+        return filenames
