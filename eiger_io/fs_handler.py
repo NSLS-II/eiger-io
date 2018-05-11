@@ -139,7 +139,7 @@ class EigerHandler(HandlerBase):
 
         self._images_per_file = images_per_file
 
-    def __call__(self, seq_id):
+    def __call__(self, seq_id, frame_num=None):
         '''
             This returns data contained in the file.
 
@@ -169,7 +169,10 @@ class EigerHandler(HandlerBase):
         md['binary_mask'] = (pixel_mask == 0)
         md['framerate'] = 1./md['frame_time']
         # TODO Return a multi-dimensional PIMS seq.
-        return EigerImages(master_path, self._images_per_file, md=md)
+        ret = EigerImages(master_path, self._images_per_file, md=md)
+        if frame_num is not None:
+            ret = ret[frame_num]
+        return ret
 
     def get_file_list(self, datum_kwargs):
         ''' get the file list.
