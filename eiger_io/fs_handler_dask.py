@@ -167,7 +167,7 @@ class EigerHandlerDask(HandlerBase):
         self._base_path = fpath
 
     # this is on a per event level
-    def __call__(self, seq_id, image_slice=None):
+    def __call__(self, seq_id, frame_num=None):
         master_path = '{}_{}_master.h5'.format(self._base_path, seq_id)
 
         data, md = _load_eiger_images(master_path)
@@ -175,8 +175,8 @@ class EigerHandlerDask(HandlerBase):
         # this gives metadata and also makes the assumption when
         # to run .compute() for dask array
         ret = PIMSDask(data, md=md)
-        if image_slice is not None:
-            ret = ret[image_slice]
+        if frame_num is not None:
+            ret = ret[frame_num]
         return ret
 
     def get_file_list(self, datum_kwargs):
