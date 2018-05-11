@@ -169,7 +169,7 @@ class EigerHandler(HandlerBase):
         md['binary_mask'] = (pixel_mask == 0)
         md['framerate'] = 1./md['frame_time']
         # TODO Return a multi-dimensional PIMS seq.
-        ret EigerImages(master_path, self._images_per_file, md=md)
+        ret = EigerImages(master_path, self._images_per_file, md=md)
         if image_slice is not None:
             ret = ret[image_slice]
         return ret
