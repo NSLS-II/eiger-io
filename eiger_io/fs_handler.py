@@ -44,14 +44,9 @@ class EigerImages(FramesSequence):
 
     @property
     def valid_keys(self):
-        valid_keys = []
-        for key in sorted(self._entry.keys()):
-            try:
-                self._entry[key]
-            except KeyError:
-                pass  # This is a link that leads nowhere.
-            else:
-                valid_keys.append(key)
+        valid_keys = [key for key in self._entry.keys() if
+                      key.startswith("data")]
+        valid_keys.sort()
         return valid_keys
 
     def get_frame(self, i):
@@ -147,6 +142,11 @@ class EigerHandler(HandlerBase):
             ----------
             seq_id : int
                 The sequence id of the data
+
+            frame_num: int or None
+                If not None, return the frame_num'th image from this
+                3D array. Useful for when an event is one image rather
+                than a stack.
 
             Returns
             -------
