@@ -152,7 +152,6 @@ class EigerHandler(HandlerBase):
             -------
                 A PIMS FramesSequence of data
         '''
-        self.seq_id = seq_id
         master_path = '{}_{}_master.h5'.format(self._base_path, seq_id)
         with h5py.File(master_path, 'r') as f:
             md = {k: f[v].value for k, v in self.EIGER_MD_LAYOUT.items()}
@@ -188,11 +187,14 @@ class EigerHandler(HandlerBase):
 
         return filenames
     
-    def get_file_size(self):
+    def get_file_size(self, datum_kwargs):
         '''get the file size
 
            returns size in bytes
         '''
-        master_path = '{}_{}_master.h5'.format(self._base_path, self.seq_id)
-        size = os.path.getsize(master_path)
-        return size
+        sizes = []
+        for dm_kw in datum_kwargs:
+            seq_id = dm_kw['seq_id']
+            master_path = '{}_{}_master.h5'.format(self._base_path, seq_id)
+            sizes.append(os.path.getsize(master_path))
+        return sizes
