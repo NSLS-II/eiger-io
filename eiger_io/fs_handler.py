@@ -1,6 +1,7 @@
 import h5py
 import os
 import re
+from glob import glob
 
 from pims import FramesSequence, Frame
 
@@ -174,15 +175,27 @@ class EigerHandler(HandlerBase):
             ret = ret[frame_num]
         return ret
 
-    def get_file_list(self, datum_kwargs):
+    def get_file_list(self, datum_kwargs_gen):
         ''' get the file list.
 
             Receives a list of datum_kwargs for each datum
         '''
         filenames = []
-        for dm_kw in datum_kwargs:
+        for dm_kw in datum_kwargs_gen:
             seq_id = dm_kw['seq_id']
-            filename = '{}_{}_master.h5'.format(self._base_path, seq_id)
-            filenames.append(filename)
+            new_filenames = glob(self._base_path + "_" + str(seq_id) + "*")
+            filenames.extend(new_filenames)
 
         return filenames
+
+    def get_file_sizes(self, datum_kwargs_gen):
+        '''get the file size
+
+           returns size in bytes
+        '''
+        sizes = []
+        file_name = self.get_file_list(datum_kwargs_gen)
+        for file in file_name:
+            sizes.append(os.path.getsize(file))
+
+        return sizes
